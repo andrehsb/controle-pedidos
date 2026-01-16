@@ -10,7 +10,11 @@ type PedidoItens = {
     F: number;
 };
 
-export default function AddPedido() {
+type AddPedidoProps = {
+    closeModal: () => void;
+};
+
+export default function AddPedido({ closeModal }: AddPedidoProps) {
 
     const [itens, setItens] = useState({
         CA: 0,
@@ -38,13 +42,13 @@ export default function AddPedido() {
 
     const temItens = Object.values(itens).some(qtd => qtd > 0);
     return (
-        <section className='w-full bg-cyan-50 px-4 py-6 max-w-md lg:max-w-4xl mx-auto relative rounded-lg' >
+        <section className='w-full bg-[#F0EACD] px-4 py-6 max-w-md lg:max-w-4xl mx-auto relative rounded-lg' >
             <h2 className='text-2xl font-bold text-[#171918] mb-4' >
                 Adicionar Pedido
             </h2>
             <button
                 type="button"
-                onClick={zerarPedido}
+                onClick={closeModal}
                 className="absolute top-0.5 md:top-4 right-1 md:right-4 p-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
                 title="Fechar Modal"
             >
@@ -55,10 +59,10 @@ export default function AddPedido() {
                     <label className='mb-1 font-medium text-[#171918]' >
                         Nome:
                     </label>
-                    <input type="text" className='text-[#171918] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-400' />
+                    <input type="text" className='text-[#171918] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#737373]' />
                 </div>
                 <div className='grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8' >
-                    <div className='bg-[#EA6E15] px-1 md:px-2 h-10 md:h-15 rounded-xl md:rounded-2xl flex items-center justify-between'>
+                    <div className='bg-[#0E0E0E] px-1 md:px-2 h-10 md:h-15 rounded-xl md:rounded-2xl flex items-center justify-between'>
                         <button type="button" onClick={() => updateQuantidade('CA', -1)}>
                             <MinusIcon className='size-4 md:size-6 text-white cursor-pointer' />
                         </button>
@@ -68,7 +72,7 @@ export default function AddPedido() {
                         </button>
                     </div>
 
-                    <div className='bg-[#EA6E15] px-1 md:px-2 h-10 md:h-15 rounded-xl md:rounded-2xl flex items-center justify-between'>
+                    <div className='bg-[#F08E09] px-1 md:px-2 h-10 md:h-15 rounded-xl md:rounded-2xl flex items-center justify-between'>
                         <button type="button" onClick={() => updateQuantidade('FB', -1)}>
                             <MinusIcon className='size-4 md:size-6 text-white cursor-pointer' />
                         </button>
@@ -78,7 +82,7 @@ export default function AddPedido() {
                         </button>
                     </div>
 
-                    <div className='bg-[#EA6E15] px-1 md:px-2 h-10 md:h-15 rounded-xl md:rounded-2xl flex items-center justify-between'>
+                    <div className='bg-[#833215] px-1 md:px-2 h-10 md:h-15 rounded-xl md:rounded-2xl flex items-center justify-between'>
                         <button type="button" onClick={() => updateQuantidade('CO', -1)}>
                             <MinusIcon className='size-4 md:size-6 text-white cursor-pointer' />
                         </button>
@@ -88,7 +92,7 @@ export default function AddPedido() {
                         </button>
                     </div>
 
-                    <div className='bg-[#EA6E15] px-1 md:px-2 h-10 md:h-15 rounded-xl md:rounded-2xl flex items-center justify-between'>
+                    <div className='bg-[#FFD21F] px-1 md:px-2 h-10 md:h-15 rounded-xl md:rounded-2xl flex items-center justify-between'>
                         <button type="button" onClick={() => updateQuantidade('F', -1)}>
                             <MinusIcon className='size-4 md:size-6 text-white cursor-pointer' />
                         </button>
@@ -98,13 +102,15 @@ export default function AddPedido() {
                         </button>
                     </div>
                 </div>
-                {temItens && (
+                {!temItens ? (
+                    <p className='text-gray-400 italic text-sm'>Nenhum item adicionado ainda.</p>
+                ) : (
                     <div className='bg-white p-4 rounded-lg border border-gray-200 mt-2 relative pr-12 animate-fade-in'>
 
                         <div className='flex flex-wrap gap-2'>
                             {Object.entries(itens).map(([nome, qtd]) => (
                                 qtd > 0 && (
-                                    <span key={nome} className='bg-cyan-100 text-cyan-800 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-2'>
+                                    <span key={nome} className='bg-[#C47D64] text-[#572F21] px-3 py-1 rounded-full text-sm font-bold flex items-center gap-2'>
                                         {qtd}x {nome}
                                     </span>
                                 )
@@ -121,7 +127,7 @@ export default function AddPedido() {
                     </div>
                 )}
 
-                <button type="submit" className='bg-[#2A7D13] text-white px-4 py-2 rounded-md hover:bg-[#16430A] transition-colors cursor-pointer' >
+                <button type="submit" className='bg-[#545454] text-white px-4 py-2 rounded-md hover:bg-[#16430A] transition-colors cursor-pointer' >
                     Adicionar Pedido
                 </button>
             </form>
