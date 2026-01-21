@@ -10,6 +10,7 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [pedidoEmEdicao, setPedidoEmEdicao] = useState<Pedido | null>(null);
 
   const fetchPedidos = async () => {
     try {
@@ -23,22 +24,32 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchPedidos(); 
-    const intervalo = setInterval(fetchPedidos, 2000); 
-    return () => clearInterval(intervalo); 
+    fetchPedidos();
+    const intervalo = setInterval(fetchPedidos, 2000);
+    return () => clearInterval(intervalo);
   }, []);
 
-  const adicionarPedido = async (nome: string, itens: { [key: string]: number }) => {
-    await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome, itens })
-    });
-    fetchPedidos(); 
+  const handleSalvarPedido = async (nome: string, itens: { [key: string]: number }) => {
+    if (pedidoEmEdicao) {
+      await fetch(`${API_URL}/${pedidoEmEdicao.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, itens })
+      });
+    } else {
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, itens })
+      });
+    }
+    setIsModalOpen(false);
+    setPedidoEmEdicao(null);
+    fetchPedidos();
   };
 
   const moverParaPronto = async (id: number) => {
-    await fetch(`${API_URL}/${id}/status`, {
+    await fetch(`${API_URL}/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'PRONTO' })
@@ -47,7 +58,7 @@ export default function Home() {
   };
 
   const returnPedido = async (id: number) => {
-    await fetch(`${API_URL}/${id}/status`, {
+    await fetch(`${API_URL}/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'PREPARANDO' }) // Volta o status
@@ -61,6 +72,12 @@ export default function Home() {
     });
     fetchPedidos();
   };
+
+  const abrirEdicao = (pedido: Pedido) => {
+    setPedidoEmEdicao(pedido);
+    setIsModalOpen(true);
+  };
+
 
   const listaGrelha = pedidos.filter(p => p.status === 'PREPARANDO').sort((a, b) => a.id - b.id);
   const listaProntos = pedidos.filter(p => p.status === 'PRONTO').sort((a, b) => a.id - b.id);
@@ -95,6 +112,7 @@ export default function Home() {
               pedidos={listaGrelha}
               textoBotao="TÁ PRONTO!"
               markStatus={moverParaPronto}
+              editar={abrirEdicao}
             />
           </div>
           <div className="bg-green-50/50 dark:bg-green-900/10 rounded-2xl p-2 md:p-4 border border-green-100 dark:border-green-900/30 min-h-[400px]">
@@ -105,16 +123,22 @@ export default function Home() {
               textoBotao="ENTREGAR"
               markStatus={entregarPedido}
               voltar={returnPedido}
+             
             />
           </div>
 
         </div>
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
+          <div onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setPedidoEmEdicao(null); 
+                setIsModalOpen(false);
+              }
+            }}className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
             <AddPedido
               closeModal={() => setIsModalOpen(false)}
-              aoAdicionar={adicionarPedido}
-            
+              aoAdicionar={handleSalvarPedido}
+              pedidoEditar={pedidoEmEdicao}
             />
           </div>
         )}

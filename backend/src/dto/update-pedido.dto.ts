@@ -1,12 +1,17 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreatePedidoDto } from './create-pedido.dto';
-import { IsIn, IsOptional } from 'class-validator';
+import { IsString, IsObject, IsOptional, IsIn } from 'class-validator';
 
-export class UpdatePedidoDto extends PartialType(CreatePedidoDto) {
-  
+export class UpdatePedidoDto {
   @IsOptional()
-  @IsIn(['PREPARANDO', 'PRONTO', 'ENTREGUE'], { 
-    message: 'Status inválido. Use: PREPARANDO, PRONTO ou ENTREGUE' 
+  @IsString()
+  nome?: string;
+
+  @IsOptional()
+  @IsObject()
+  itens?: Record<string, number>;
+
+  @IsOptional()
+  @IsIn(['PREPARANDO', 'PRONTO', 'ENTREGUE'], {
+    message: 'Status deve ser: PREPARANDO, PRONTO ou ENTREGUE',
   })
   status?: 'PREPARANDO' | 'PRONTO' | 'ENTREGUE';
 }

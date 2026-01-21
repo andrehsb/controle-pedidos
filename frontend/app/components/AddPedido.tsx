@@ -1,7 +1,7 @@
 'use client';
 
 import { PlusIcon, XMarkIcon, MinusIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type PedidoItens = {
     CA: number;
@@ -13,9 +13,10 @@ type PedidoItens = {
 type AddPedidoProps = {
     closeModal: () => void;
     aoAdicionar: (nome: string, itens: PedidoItens) => void;
+    pedidoEditar?: { nome: string; itens: any } | null;
 };
 
-export default function AddPedido({ closeModal, aoAdicionar }: AddPedidoProps) {
+export default function AddPedido({ closeModal, aoAdicionar, pedidoEditar }: AddPedidoProps) {
 
     const [nome, setNome] = useState('');
 
@@ -35,6 +36,23 @@ export default function AddPedido({ closeModal, aoAdicionar }: AddPedidoProps) {
             };
         });
     };
+    
+    useEffect(() => {
+        if (pedidoEditar) {
+            setNome(pedidoEditar.nome);
+            setItens({
+                CA: pedidoEditar.itens.CA || 0,
+                FB: pedidoEditar.itens.FB || 0,
+                CO: pedidoEditar.itens.CO || 0,
+                F: pedidoEditar.itens.F || 0
+            });
+        } else {
+            // Limpa se for novo pedido
+            setNome('');
+            setItens({ CA: 0, FB: 0, CO: 0, F: 0 });
+        }
+    }, [pedidoEditar]);
+
     const zerarPedido = () => {
         setItens({
             CA: 0,
@@ -47,7 +65,6 @@ export default function AddPedido({ closeModal, aoAdicionar }: AddPedidoProps) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         aoAdicionar(nome, itens);
-
         closeModal();
     };
 
@@ -55,7 +72,7 @@ export default function AddPedido({ closeModal, aoAdicionar }: AddPedidoProps) {
     return (
         <section className='w-full bg-[#F0EACD] px-4 py-6 max-w-md lg:max-w-4xl mx-auto relative rounded-lg' >
             <h2 className='text-2xl font-bold text-[#171918] mb-4' >
-                Adicionar Pedido
+                {pedidoEditar ? "Editar Pedido" : "Adicionar Pedido"}
             </h2>
             <button
                 type="button"
@@ -72,7 +89,7 @@ export default function AddPedido({ closeModal, aoAdicionar }: AddPedidoProps) {
                         Nome:
                     </label>
                     <input type="text" value={nome}
-                        onChange={(e) => setNome(e.target.value)} 
+                        onChange={(e) => setNome(e.target.value)}
                         className='text-[#171918] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#737373]' />
                 </div>
                 <div className='grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8' >
@@ -142,7 +159,7 @@ export default function AddPedido({ closeModal, aoAdicionar }: AddPedidoProps) {
                 )}
 
                 <button type="submit" className='bg-[#545454] text-white px-4 py-2 rounded-md hover:bg-[#16430A] transition-colors cursor-pointer' >
-                    Adicionar Pedido
+                    {pedidoEditar ? "Salvar Alterações" : "Adicionar Pedido"}
                 </button>
             </form>
         </section>

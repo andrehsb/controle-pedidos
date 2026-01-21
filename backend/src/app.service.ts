@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePedidoDto } from './dto/create-pedido.dto'; // Verifique se o caminho está certo
-import { UpdatePedidoDto } from './dto/update-pedido.dto'; // Verifique se o caminho está certo
-
-// Definindo o tipo aqui para não depender do Prisma por enquanto
+import { CreatePedidoDto } from './dto/create-pedido.dto'; 
+import { UpdatePedidoDto } from './dto/update-pedido.dto'; 
 export interface Pedido {
   id: number;
   nome: string;
@@ -12,14 +10,13 @@ export interface Pedido {
 
 @Injectable()
 export class PedidosService {
-  // ESSA É A MEMÓRIA DO SERVIDOR
   private pedidos: Pedido[] = []; 
 
   create(createPedidoDto: CreatePedidoDto) {
     const novoPedido: Pedido = {
       id: Date.now(),
       nome: createPedidoDto.nome,
-      itens: createPedidoDto.itens || {}, // Garante que itens venha do DTO
+      itens: createPedidoDto.itens || {},
       status: 'PREPARANDO',
     };
     this.pedidos.push(novoPedido);
@@ -30,11 +27,14 @@ export class PedidosService {
     return this.pedidos;
   }
 
-  updateStatus(id: number, status: 'PREPARANDO' | 'PRONTO' | 'ENTREGUE') {
-    const pedidoIndex = this.pedidos.findIndex((p) => p.id == id); 
-    if (pedidoIndex > -1) {
-      this.pedidos[pedidoIndex].status = status;
-      return this.pedidos[pedidoIndex];
+  update(id: number, updatePedidoDto: any) {
+    const index = this.pedidos.findIndex((p) => p.id == id);
+    if (index > -1) {
+      this.pedidos[index] = {
+        ...this.pedidos[index],
+        ...updatePedidoDto,
+      };
+      return this.pedidos[index];
     }
     return null;
   }
