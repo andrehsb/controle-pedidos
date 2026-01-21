@@ -12,9 +12,12 @@ type PedidoItens = {
 
 type AddPedidoProps = {
     closeModal: () => void;
+    aoAdicionar: (nome: string, itens: PedidoItens) => void;
 };
 
-export default function AddPedido({ closeModal }: AddPedidoProps) {
+export default function AddPedido({ closeModal, aoAdicionar }: AddPedidoProps) {
+
+    const [nome, setNome] = useState('');
 
     const [itens, setItens] = useState({
         CA: 0,
@@ -22,6 +25,7 @@ export default function AddPedido({ closeModal }: AddPedidoProps) {
         CO: 0,
         F: 0
     });
+
     const updateQuantidade = (tipo: keyof PedidoItens, valor: number) => {
         setItens(prev => {
             const novaQtd = prev[tipo] + valor;
@@ -40,6 +44,13 @@ export default function AddPedido({ closeModal }: AddPedidoProps) {
         });
     };
 
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        aoAdicionar(nome, itens);
+
+        closeModal();
+    };
+
     const temItens = Object.values(itens).some(qtd => qtd > 0);
     return (
         <section className='w-full bg-[#F0EACD] px-4 py-6 max-w-md lg:max-w-4xl mx-auto relative rounded-lg' >
@@ -54,12 +65,15 @@ export default function AddPedido({ closeModal }: AddPedidoProps) {
             >
                 <XMarkIcon className="size-6" />
             </button>
-            <form className='flex flex-col gap-4' >
+
+            <form onSubmit={handleSubmit} className='flex flex-col gap-4' >
                 <div className='flex flex-col' >
                     <label className='mb-1 font-medium text-[#171918]' >
                         Nome:
                     </label>
-                    <input type="text" className='text-[#171918] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#737373]' />
+                    <input type="text" value={nome}
+                        onChange={(e) => setNome(e.target.value)} 
+                        className='text-[#171918] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#737373]' />
                 </div>
                 <div className='grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8' >
                     <div className='bg-[#0E0E0E] px-1 md:px-2 h-10 md:h-15 rounded-xl md:rounded-2xl flex items-center justify-between'>
