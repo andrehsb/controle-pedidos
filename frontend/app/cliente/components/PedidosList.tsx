@@ -1,44 +1,49 @@
-type Pedido = {
+
+
+export type StatusPedido = 'PREPARANDO' | 'PRONTO' | 'ENTREGUE';
+
+export type Pedido = {
+    id: number;
     nome: string;
     itens: { [key: string]: number };
+    status: StatusPedido;
 };
 
 type ListPedidosProps = {
+    titulo: string;
     pedidos: Pedido[];
+    corTitulo: string;
 };
 
-export default function ListPedidos({ pedidos }: ListPedidosProps) {
+export default function ListPedidos({ titulo, pedidos, corTitulo }: ListPedidosProps) {
     return (
-        <section className="w-full max-w-md mt-8 px-4">
-            <h2 className="text-xl font-bold mb-4 text-black dark:text-white border-b pb-2">
-                Pedidos ({pedidos.length})
+        <section className="w-full mt-4 px-2">
+            <h2 className={`text-2xl font-bold mb-4 ${corTitulo} border-b pb-2 flex justify-between items-end`}>
+                {titulo}
+                <span className="text-sm text-gray-500 font-normal">{pedidos.length} pedidos</span>
             </h2>
 
             {pedidos.length === 0 ? (
                 <p className="text-gray-500 text-center py-4">Nenhum pedido na fila.</p>
             ) : (
-                <div className="flex flex-col gap-3">
-                    {pedidos.map((pedido, index) => (
-                        <div key={index} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center">
+                <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4">
 
-                            <div className="flex flex-col gap-3">
-                                <h3 className="font-bold text-lg text-gray-800">{pedido.nome}</h3>
-                                <div className='flex flex-wrap gap-2'>
-
+                    {pedidos.map((pedido) => (
+                        <div key={pedido.id} className="relative bg-white p-4 pt-1 gap-3 rounded-lg shadow-sm border border-gray-200 flex flex-col justify-between h-full">
+                            <div className="flex flex-col gap-1">
+                                <h3 className="font-bold text-center w-full text-[30px] mt-1 text-gray-800">
+                                    {pedido.nome}
+                                </h3>
+                                <div className='flex flex-wrap gap-2 justify-center'>
                                     {Object.entries(pedido.itens).map(([nome, qtd]) => (
-
                                         qtd > 0 && (
-                                                <span key={nome} className='bg-[#C47D64] text-[#572F21] px-3 py-1 rounded-full text-sm font-bold flex items-center gap-2'>
-                                                    {qtd}x {nome}
-                                                </span>  
+                                            <span key={nome} className='bg-[#C47D64] text-[#572F21] px-3 py-2 rounded-full text-[16px] font-bold flex items-center gap-2'>
+                                                {qtd}x {nome}
+                                            </span>
                                         )
                                     ))}
                                 </div>
                             </div>
-
-                            <span className="text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded border border-yellow-200">
-                                PREPARANDO
-                            </span>
                         </div>
                     ))}
                 </div>
