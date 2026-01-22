@@ -3,14 +3,30 @@ import { useState, useEffect } from "react";
 import AddPedido from "./components/AddPedido";
 import ListPedidos, { Pedido } from "./components/ListPedidos";
 import { PlusIcon } from "@heroicons/react/24/solid";
+import { useRouter } from "next/navigation";
+import Cookies from 'js-cookie';
 
 const API_URL = 'http://192.168.15.173:3001/pedidos';
 
 export default function Home() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [pedidoEmEdicao, setPedidoEmEdicao] = useState<Pedido | null>(null);
+
+  useEffect(() => {
+    const token = Cookies.get('token_pedidos');
+    if (token) {
+      setIsAuthenticated(true);
+    } else {
+      router.push('/login');
+    }
+    setIsLoading(false);
+  }, [router]);
+
   const fetchPedidos = async () => {
     try {
       const res = await fetch(API_URL);
@@ -22,10 +38,12 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchPedidos();
-    const intervalo = setInterval(fetchPedidos, 2000);
-    return () => clearInterval(intervalo);
-  }, []);
+    if (isAuthenticated) {
+      fetchPedidos();
+      const intervalo = setInterval(fetchPedidos, 2000);
+      return () => clearInterval(intervalo);
+    }
+  }, [isAuthenticated]);
 
   const handleSalvarPedido = async (nome: string, itens: { [key: string]: number }) => {
     if (pedidoEmEdicao) {
@@ -93,6 +111,14 @@ export default function Home() {
     setIsModalOpen(true);
   };
 
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const listaGrelha = pedidos.filter(p => p.status === 'PREPARANDO').sort((a, b) => a.id - b.id);
   const listaProntos = pedidos.filter(p => p.status === 'PRONTO').sort((a, b) => a.id - b.id);
