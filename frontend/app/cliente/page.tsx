@@ -6,11 +6,7 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 const API_URL = 'http://192.168.15.173:3001/pedidos';
 
 export default function Home() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
-  const [pedidoEmEdicao, setPedidoEmEdicao] = useState<Pedido | null>(null);
-
   const fetchPedidos = async () => {
     try {
       const res = await fetch(API_URL);
@@ -27,55 +23,6 @@ export default function Home() {
     const intervalo = setInterval(fetchPedidos, 2000);
     return () => clearInterval(intervalo);
   }, []);
-
-  const handleSalvarPedido = async (nome: string, itens: { [key: string]: number }) => {
-    if (pedidoEmEdicao) {
-      await fetch(`${API_URL}/${pedidoEmEdicao.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, itens })
-      });
-    } else {
-      await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, itens })
-      });
-    }
-    setIsModalOpen(false);
-    setPedidoEmEdicao(null);
-    fetchPedidos();
-  };
-
-  const moverParaPronto = async (id: number) => {
-    await fetch(`${API_URL}/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'PRONTO' })
-    });
-    fetchPedidos();
-  };
-
-  const returnPedido = async (id: number) => {
-    await fetch(`${API_URL}/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'PREPARANDO' }) // Volta o status
-    });
-    fetchPedidos();
-  };
-
-  const entregarPedido = async (id: number) => {
-    await fetch(`${API_URL}/${id}`, {
-      method: 'DELETE',
-    });
-    fetchPedidos();
-  };
-
-  const abrirEdicao = (pedido: Pedido) => {
-    setPedidoEmEdicao(pedido);
-    setIsModalOpen(true);
-  };
 
 
   const listaGrelha = pedidos.filter(p => p.status === 'PREPARANDO').sort((a, b) => a.id - b.id);
@@ -95,14 +42,14 @@ export default function Home() {
         </header>
 
         <div className="flex flex-col gap-10 w-full">
-          <div className="bg-orange-50/50 dark:bg-orange-900/10 rounded-2xl p-2 md:p-4 border border-orange-100 dark:border-orange-900/30 min-h-[400px]">
+          <div className="bg-orange-50/50 dark:bg-orange-900/10 rounded-2xl p-2 md:p-4 border border-orange-100 dark:border-orange-900/30 h-fit transition-all duration-300">
             <ListPedidos
               titulo="Preparando"
               corTitulo="text-orange-600"
               pedidos={listaGrelha}
             />
           </div>
-          <div className="bg-green-50/50 dark:bg-green-900/10 rounded-2xl p-2 md:p-4 border border-green-100 dark:border-green-900/30 min-h-[400px]">
+          <div className="bg-green-50/50 dark:bg-green-900/10 rounded-2xl p-2 md:p-4 border border-green-100 dark:border-green-900/30 h-fit transition-all duration-300">
             <ListPedidos
               titulo="✅ Prontos"
               corTitulo="text-green-600"

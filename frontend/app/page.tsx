@@ -11,11 +11,9 @@ export default function Home() {
 
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [pedidoEmEdicao, setPedidoEmEdicao] = useState<Pedido | null>(null);
-
   const fetchPedidos = async () => {
     try {
       const res = await fetch(API_URL);
-      console.log("Resposta do servidor:", res);
       const data = await res.json();
       setPedidos(data);
     } catch (error) {
@@ -57,22 +55,39 @@ export default function Home() {
     fetchPedidos();
   };
 
-  const returnPedido = async (id: number) => {
+  const returnPrepPedido = async (id: number) => {
     await fetch(`${API_URL}/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'PREPARANDO' }) // Volta o status
+      body: JSON.stringify({ status: 'PREPARANDO' })
     });
     fetchPedidos();
   };
 
-  const entregarPedido = async (id: number) => {
+  const returnReadyPedido = async (id: number) => {
+    await fetch(`${API_URL}/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'PRONTO' })
+    });
+    fetchPedidos();
+  };
+
+  const excluirPedido = async (id: number) => {
     await fetch(`${API_URL}/${id}`, {
       method: 'DELETE',
     });
     fetchPedidos();
   };
 
+  const entregarPedido = async (id: number) => {
+    await fetch(`${API_URL}/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'ENTREGUE' })
+    });
+    fetchPedidos();
+  };
   const abrirEdicao = (pedido: Pedido) => {
     setPedidoEmEdicao(pedido);
     setIsModalOpen(true);
@@ -81,6 +96,7 @@ export default function Home() {
 
   const listaGrelha = pedidos.filter(p => p.status === 'PREPARANDO').sort((a, b) => a.id - b.id);
   const listaProntos = pedidos.filter(p => p.status === 'PRONTO').sort((a, b) => a.id - b.id);
+  const listaEntregues = pedidos.filter(p => p.status === 'ENTREGUE').sort((a, b) => a.id - b.id);
 
   return (
     <div className="min-h-screen w-full bg-gray-50 dark:bg-[#121212] font-sans overflow-x-hidden">
@@ -104,8 +120,7 @@ export default function Home() {
         </header>
 
         <div className="flex flex-col gap-10 w-full">
-
-          <div className="bg-orange-50/50 dark:bg-orange-900/10 rounded-2xl p-2 md:p-4 border border-orange-100 dark:border-orange-900/30 min-h-[400px]">
+          <div className="bg-orange-50/50 dark:bg-orange-900/10 rounded-2xl p-2 md:p-4 border border-orange-100 dark:border-orange-900/30 h-fit transition-all duration-300">
             <ListPedidos
               titulo="Preparando"
               corTitulo="text-orange-600"
@@ -115,26 +130,38 @@ export default function Home() {
               editar={abrirEdicao}
             />
           </div>
-          <div className="bg-green-50/50 dark:bg-green-900/10 rounded-2xl p-2 md:p-4 border border-green-100 dark:border-green-900/30 min-h-[400px]">
+          <div className="bg-green-50/50 dark:bg-green-900/10 rounded-2xl p-2 md:p-4 border border-green-100 dark:border-green-900/30 h-fit transition-all duration-300">
             <ListPedidos
               titulo="✅ Prontos"
               corTitulo="text-green-600"
               pedidos={listaProntos}
               textoBotao="ENTREGAR"
               markStatus={entregarPedido}
-              voltar={returnPedido}
-             
+              voltar={returnPrepPedido}
+
+            />
+          </div>
+
+          <div className="bg-gray-50/50 dark:bg-gray-900/10 rounded-2xl p-2 md:p-4 border border-gray-100 dark:border-gray-900/30 h-fit transition-all duration-300">
+            <ListPedidos
+              titulo="Entregues"
+              corTitulo="text-gray-500"
+              pedidos={listaEntregues}
+              textoBotao="FINALIZAR"
+              markStatus={excluirPedido}
+              voltar={returnReadyPedido}
+
             />
           </div>
 
         </div>
         {isModalOpen && (
           <div onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setPedidoEmEdicao(null); 
-                setIsModalOpen(false);
-              }
-            }}className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
+            if (e.target === e.currentTarget) {
+              setPedidoEmEdicao(null);
+              setIsModalOpen(false);
+            }
+          }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
             <AddPedido
               closeModal={() => setIsModalOpen(false)}
               aoAdicionar={handleSalvarPedido}

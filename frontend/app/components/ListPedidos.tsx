@@ -1,4 +1,5 @@
-import { ArrowUturnLeftIcon, CheckIcon, FireIcon, PencilIcon } from "@heroicons/react/24/outline";
+import { ArrowUturnLeftIcon, CheckIcon, FireIcon, PencilIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
 
 export type StatusPedido = 'PREPARANDO' | 'PRONTO' | 'ENTREGUE';
 
@@ -19,20 +20,49 @@ type ListPedidosProps = {
     editar?: (pedido: Pedido) => void;
 };
 
+const coresStatus = {
+    PREPARANDO: 'bg-gray-800 hover:bg-black',
+    PRONTO: 'bg-green-600 hover:bg-green-700',
+    ENTREGUE: 'bg-gray-400 hover:bg-gray-500',
+};
+
+const titleButton = {
+    PREPARANDO: 'MARCAR COMO PRONTO',
+    PRONTO: 'ENTREGAR PEDIDO',
+    ENTREGUE: 'FINALIZAR PEDIDO',
+};
+
+
 export default function ListPedidos({ titulo, pedidos, corTitulo, textoBotao, markStatus, voltar, editar }: ListPedidosProps) {
+
+    const [listaAberta, setListaAberta] = useState(true);
     return (
         <section className="w-full mt-4 px-2">
-            <h2 className={`text-2xl font-bold mb-4 ${corTitulo} border-b pb-2 flex justify-between items-end`}>
-                {titulo}
+            <div
+                onClick={() => setListaAberta(!listaAberta)}
+                className={`group cursor-pointer select-none flex items-center justify-between mb-4 border-b pb-2 
+                ${corTitulo} `}
+            >
+                <div className="flex items-center gap-3">
+
+                    <h2 className="text-2xl font-bold">
+                        {titulo}
+                    </h2>
+                    <ChevronUpIcon
+                        className={`size-6 transition-transform duration-300 ${listaAberta ? '' : 'rotate-180'}`}
+                    />
+                    <span className="text-sm font-normal text-gray-400 group-hover:text-gray-600 transition-colors">
+                        {listaAberta ? '(fechar)' : '(abrir)'}
+                    </span>
+                </div>
                 <span className="text-sm text-gray-500 font-normal">{pedidos.length} pedidos</span>
-            </h2>
+            </div>
 
             {pedidos.length === 0 ? (
                 <p className="text-gray-500 text-center py-4">Nenhum pedido na fila.</p>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4">
-
-                    {pedidos.map((pedido) => (
+                    {listaAberta && pedidos.map((pedido) => (
                         <div key={pedido.id} className="relative bg-white p-4 gap-3 rounded-lg shadow-sm border border-gray-200 flex flex-col justify-between h-full">
                             {editar && (
                                 <button
@@ -67,11 +97,8 @@ export default function ListPedidos({ titulo, pedidos, corTitulo, textoBotao, ma
                             </div>
                             <button
                                 onClick={() => markStatus(pedido.id)}
-                                className={`w-full sm:w-auto px-6 py-3 md:px-3 md:py-2 rounded-lg font-bold text-white shadow-md transition-all active:scale-95 flex items-center justify-center gap-2
-                                    ${pedido.status === 'PREPARANDO'
-                                        ? 'bg-gray-800 hover:bg-black'
-                                        : 'bg-green-600 hover:bg-green-700'
-                                    }`}
+                                className={`w-full sm:w-auto px-6 py-3 md:px-3 md:py-2 rounded-lg font-bold text-white shadow-md 
+                                    transition-all active:scale-95 flex items-center justify-center gap-2 ${coresStatus[pedido.status]}`}
                             >
                                 {pedido.status === 'PREPARANDO' ? <FireIcon className="size-5" /> : <CheckIcon className="size-5" />}
                                 {textoBotao}
