@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePedidoDto } from './dto/create-pedido.dto'; 
-import { UpdatePedidoDto } from './dto/update-pedido.dto'; 
+import { CreatePedidoDto } from './dto/create-pedido.dto';
+import { UpdatePedidoDto } from './dto/update-pedido.dto';
+import { PrismaService } from './prisma.service';
 export interface Pedido {
   id: number;
   nome: string;
@@ -10,41 +11,39 @@ export interface Pedido {
 
 @Injectable()
 export class PedidosService {
-  private pedidos: Pedido[] = []; 
+  constructor(private prisma: PrismaService) { }
 
-  create(createPedidoDto: CreatePedidoDto) {
-    const novoPedido: Pedido = {
-      id: Date.now(),
-      nome: createPedidoDto.nome,
-      itens: createPedidoDto.itens || {},
-      status: 'PREPARANDO',
-    };
-    this.pedidos.push(novoPedido);
-    return novoPedido;
+  async create(createPedidoDto: CreatePedidoDto) {
+    return this.prisma.pedido.create({
+      data: {
+        nome: createPedidoDto.nome,
+        itens: createPedidoDto.itens as any,
+        status: 'PREPARANDO',
+      },
+    });
   }
 
-  findAll() {
-    return this.pedidos;
+  async findAll() {
+    return this.prisma.pedido.findMany({
+      orderBy: {
+        id: 'asc',
+      },
+    });
   }
 
-  update(id: number, updatePedidoDto: any) {
-    const index = this.pedidos.findIndex((p) => p.id == id);
-    if (index > -1) {
-      this.pedidos[index] = {
-        ...this.pedidos[index],
+  async update(id: number, updatePedidoDto: any) {
+    return this.prisma.pedido.update({
+      where: { id },
+      data: {
         ...updatePedidoDto,
-      };
-      return this.pedidos[index];
-    }
-    return null;
+        itens: updatePedidoDto.itens ? (updatePedidoDto.itens as any) : undefined,
+      },
+    });
   }
 
-  remove(id: number) {
-    const index = this.pedidos.findIndex((p) => p.id == id);
-    if (index > -1) {
-      const removido = this.pedidos[index];
-      this.pedidos.splice(index, 1);
-      return removido;
-    }
+  async remove(id: number) {
+    return this.prisma.pedido.delete({
+      where: { id },
+    });
   }
 }

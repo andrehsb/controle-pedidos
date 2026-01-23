@@ -5,6 +5,7 @@ import ListPedidos, { Pedido } from "./components/ListPedidos";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 import Cookies from 'js-cookie';
+import { supabase } from './services/supabase';
 
 const API_URL = 'http://192.168.15.173:3001/pedidos';
 
@@ -40,8 +41,19 @@ export default function Home() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchPedidos();
-      const intervalo = setInterval(fetchPedidos, 2000);
-      return () => clearInterval(intervalo);
+      console.log(" Conectando ao Realtime do Supabase...");
+      const channel = supabase
+        .channel('mudancas-pedidos')
+        .on(
+          'postgres_changes',{ event: '*',schema: 'public',table: 'Pedido' },
+          (payload) => {
+            fetchPedidos();
+          }
+        )
+        .subscribe();
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [isAuthenticated]);
 
@@ -61,7 +73,6 @@ export default function Home() {
     }
     setIsModalOpen(false);
     setPedidoEmEdicao(null);
-    fetchPedidos();
   };
 
   const moverParaPronto = async (id: number) => {
@@ -70,7 +81,6 @@ export default function Home() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'PRONTO' })
     });
-    fetchPedidos();
   };
 
   const returnPrepPedido = async (id: number) => {
@@ -79,7 +89,6 @@ export default function Home() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'PREPARANDO' })
     });
-    fetchPedidos();
   };
 
   const returnReadyPedido = async (id: number) => {
@@ -88,14 +97,12 @@ export default function Home() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'PRONTO' })
     });
-    fetchPedidos();
   };
 
   const excluirPedido = async (id: number) => {
     await fetch(`${API_URL}/${id}`, {
       method: 'DELETE',
     });
-    fetchPedidos();
   };
 
   const entregarPedido = async (id: number) => {
@@ -104,7 +111,6 @@ export default function Home() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'ENTREGUE' })
     });
-    fetchPedidos();
   };
   const abrirEdicao = (pedido: Pedido) => {
     setPedidoEmEdicao(pedido);

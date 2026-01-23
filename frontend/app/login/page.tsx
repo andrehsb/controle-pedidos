@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { BackspaceIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import Cookies from 'js-cookie';
 
+const API_URL = 'http://192.168.15.173:3001/pedidos';
 export default function LoginPage() {
     const router = useRouter();
     
@@ -28,18 +29,27 @@ export default function LoginPage() {
         }
     };
 
-    const handleLogin = async () => {
+   const handleLogin = async () => {
         setLoading(true);
-        setTimeout(() => {
-            if (pin === PIN_CORRETO) {
-                Cookies.set('token_pedidos', 'acesso-garantido', { expires: 1 });
+
+        try {
+            const response = await fetch(API_URL + '/login', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: pin }) 
+            });
+            if (response.ok) {
+                Cookies.set('token_pedidos', 'acesso-garantido', { expires: 5 / 24 });
                 router.push('/');
             } else {
-                setError(true);
-                setPin(''); 
-                setLoading(false);
+                throw new Error('Senha incorreta');
             }
-        }, 500);
+
+        } catch (err) {
+            setError(true);
+            setPin('');
+            setTimeout(() => setLoading(false), 500); 
+        }
     };
 
     useEffect(() => {
@@ -59,7 +69,7 @@ export default function LoginPage() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [pin, loading]); // Dependências para garantir estado atualizado
+    }, [pin, loading])
 
     return (
         <main className="min-h-screen flex items-center justify-center bg-[#F0EACD] p-4 font-sans">

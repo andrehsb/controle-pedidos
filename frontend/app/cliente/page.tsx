@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from "react";
 import ListPedidos, { Pedido } from "./components/PedidosList";
-import { PlusIcon } from "@heroicons/react/24/solid";
+
+import { supabase } from '../services/supabase';
 
 const API_URL = 'http://192.168.15.173:3001/pedidos';
 
@@ -10,7 +11,6 @@ export default function Home() {
   const fetchPedidos = async () => {
     try {
       const res = await fetch(API_URL);
-      console.log("Resposta do servidor:", res);
       const data = await res.json();
       setPedidos(data);
     } catch (error) {
@@ -18,10 +18,21 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    fetchPedidos();
-    const intervalo = setInterval(fetchPedidos, 2000);
-    return () => clearInterval(intervalo);
+  useEffect(() => {fetchPedidos();
+      console.log(" Conectando ao Realtime do Supabase...");
+      const channel = supabase
+        .channel('mudancas-pedidos')
+        .on(
+          'postgres_changes',{ event: '*',schema: 'public',table: 'Pedido' },
+          (payload) => {
+            console.log(" Mudança detectada!", payload);
+            fetchPedidos();
+          }
+        )
+        .subscribe();
+      return () => {
+        supabase.removeChannel(channel);
+      };
   }, []);
 
 
