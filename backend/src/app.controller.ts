@@ -32,6 +32,8 @@ export class PedidosController {
     // Pega a senha do arquivo .env
     const senhaCorreta = process.env.ADMIN_PIN;
 
+    console.log("+++++" + senhaCorreta);
+    console.log("+++++" + body.pin);
     // Compara a senha enviada com a do sistema
     if (body.pin === senhaCorreta) {
       return {
