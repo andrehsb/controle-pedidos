@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { BackspaceIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import Cookies from 'js-cookie';
 
-const API_URL = 'http://192.168.15.173:3001/pedidos';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/pedidos';
+
 export default function LoginPage() {
     const router = useRouter();
     

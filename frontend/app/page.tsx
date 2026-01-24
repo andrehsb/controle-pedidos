@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import Cookies from 'js-cookie';
 import { supabase } from './services/supabase';
 
-const API_URL = 'http://192.168.15.173:3001/pedidos';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/pedidos';
 
 export default function Home() {
   const router = useRouter();
