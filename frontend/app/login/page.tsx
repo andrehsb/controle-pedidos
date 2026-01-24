@@ -6,6 +6,7 @@ import { BackspaceIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import Cookies from 'js-cookie';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/pedidos';
+console.log("API_URL de login page: " + API_URL);
 
 export default function LoginPage() {
     const router = useRouter();
