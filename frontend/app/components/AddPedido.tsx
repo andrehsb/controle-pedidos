@@ -10,6 +10,13 @@ type PedidoItens = {
     F: number;
 };
 
+const PRECOS: Record<keyof PedidoItens, number> = {
+    CA: 12.00,
+    FB: 12.00,
+    CO: 10.00,
+    F: 10.00
+};
+
 type AddPedidoProps = {
     closeModal: () => void;
     aoAdicionar: (nome: string, itens: PedidoItens) => void;
@@ -36,7 +43,7 @@ export default function AddPedido({ closeModal, aoAdicionar, pedidoEditar }: Add
             };
         });
     };
-    
+
     useEffect(() => {
         if (pedidoEditar) {
             setNome(pedidoEditar.nome);
@@ -66,6 +73,18 @@ export default function AddPedido({ closeModal, aoAdicionar, pedidoEditar }: Add
         e.preventDefault();
         aoAdicionar(nome, itens);
         closeModal();
+    };
+
+    const totalPedido = Object.entries(itens).reduce((acc, [key, qtd]) => {
+        const precoItem = PRECOS[key as keyof PedidoItens];
+        return acc + (qtd * precoItem);
+    }, 0);
+
+    const formatarMoeda = (valor: number) => {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(valor);
     };
 
     const temItens = Object.values(itens).some(qtd => qtd > 0);
@@ -146,6 +165,11 @@ export default function AddPedido({ closeModal, aoAdicionar, pedidoEditar }: Add
                                     </span>
                                 )
                             ))}
+                        </div>
+                        <div className=" border-gray-200 pt-3 flex items-center">
+                            <span className="text-xl font-bold text-[#16430A]">
+                                {formatarMoeda(totalPedido)}
+                            </span>
                         </div>
                         <button
                             type='button'
