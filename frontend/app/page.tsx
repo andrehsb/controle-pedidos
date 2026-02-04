@@ -17,6 +17,140 @@ export default function Home() {
 
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [pedidoEmEdicao, setPedidoEmEdicao] = useState<Pedido | null>(null);
+  const [pedidoSelecionadoId, setPedidoSelecionadoId] = useState<number | null>(null);
+  const listaGrelha = pedidos.filter(p => p.status === 'PREPARANDO').sort((a, b) => a.id - b.id);
+  const listaProntos = pedidos.filter(p => p.status === 'PRONTO').sort((a, b) => a.id - b.id);
+  const listaEntregues = pedidos.filter(p => p.status === 'ENTREGUE').sort((a, b) => a.id - b.id);
+
+  const [usandoTeclado, setUsandoTeclado] = useState(false);
+  useEffect(() => {
+    const ativarTeclado = () => setUsandoTeclado(true);
+    const ativarMouse = () => setUsandoTeclado(false);
+    window.addEventListener('keydown', ativarTeclado);
+    window.addEventListener('mousedown', ativarMouse);
+    return () => {
+      window.removeEventListener('keydown', ativarTeclado);
+      window.removeEventListener('mousedown', ativarMouse);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const tag = (event.target as HTMLElement).tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft'].includes(event.key)) {
+        event.preventDefault();
+      }
+      let numColunas = 1;
+      if (window.innerWidth >= 1024) numColunas = 4;
+      else if (window.innerWidth >= 768) numColunas = 2;
+      if (!pedidoSelecionadoId) {
+        if (listaGrelha.length > 0) setPedidoSelecionadoId(listaGrelha[0].id);
+        else if (listaProntos.length > 0) setPedidoSelecionadoId(listaProntos[0].id);
+        return;
+      }
+      let listaAtual: Pedido[] = [];
+      let nomeListaAtual = '';
+      let indexAtual = -1;
+
+      if (listaGrelha.some(p => p.id === pedidoSelecionadoId)) {
+        listaAtual = listaGrelha;
+        nomeListaAtual = 'GRELHA';
+        indexAtual = listaGrelha.findIndex(p => p.id === pedidoSelecionadoId);
+      } else if (listaProntos.some(p => p.id === pedidoSelecionadoId)) {
+        listaAtual = listaProntos;
+        nomeListaAtual = 'PRONTOS';
+        indexAtual = listaProntos.findIndex(p => p.id === pedidoSelecionadoId);
+      } else if (listaEntregues.some(p => p.id === pedidoSelecionadoId)) {
+        listaAtual = listaEntregues;
+        nomeListaAtual = 'ENTREGUES';
+        indexAtual = listaEntregues.findIndex(p => p.id === pedidoSelecionadoId);
+      }
+      const colunaVisual = indexAtual % numColunas;
+
+      switch (event.key) {
+        case 'ArrowRight':
+          if (indexAtual < listaAtual.length - 1) {
+            setPedidoSelecionadoId(listaAtual[indexAtual + 1].id);
+          } else {
+          }
+          break;
+
+        case 'ArrowLeft':
+          if (indexAtual > 0) {
+            setPedidoSelecionadoId(listaAtual[indexAtual - 1].id);
+          }
+          break;
+        case 'ArrowDown':
+          const abaixoNaMesmaLista = indexAtual + numColunas;
+          if (abaixoNaMesmaLista < listaAtual.length) {
+            setPedidoSelecionadoId(listaAtual[abaixoNaMesmaLista].id);
+          }
+          else {
+            let proximaLista: Pedido[] | null = null;
+            if (nomeListaAtual === 'GRELHA') proximaLista = listaProntos;
+            else if (nomeListaAtual === 'PRONTOS') proximaLista = listaEntregues;
+
+            if (proximaLista && proximaLista.length > 0) {
+              const indiceAlvo = Math.min(colunaVisual, proximaLista.length - 1);
+              setPedidoSelecionadoId(proximaLista[indiceAlvo].id);
+            }
+          }
+          break;
+        case 'ArrowUp':
+          const acimaNaMesmaLista = indexAtual - numColunas;
+          if (acimaNaMesmaLista >= 0) {
+            setPedidoSelecionadoId(listaAtual[acimaNaMesmaLista].id);
+          }
+          else {
+            let listaAnterior: Pedido[] | null = null;
+            if (nomeListaAtual === 'ENTREGUES') listaAnterior = listaProntos;
+            else if (nomeListaAtual === 'PRONTOS') listaAnterior = listaGrelha;
+
+            if (listaAnterior && listaAnterior.length > 0) {
+              const totalLinhas = Math.ceil(listaAnterior.length / numColunas);
+              let indiceAlvo = ((totalLinhas - 1) * numColunas) + colunaVisual;
+              if (indiceAlvo >= listaAnterior.length) {
+                indiceAlvo -= numColunas;
+              }
+              if (indiceAlvo < 0) indiceAlvo = listaAnterior.length - 1;
+
+              setPedidoSelecionadoId(listaAnterior[indiceAlvo].id);
+            }
+          }
+          break;
+
+        case 'Escape':
+          setPedidoSelecionadoId(null);
+          break;
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [listaGrelha, listaProntos, listaEntregues, pedidoSelecionadoId]);
+
+  const selecionarProximoDaFila = (idAtual: number) => {
+    let listaAtual: Pedido[] = [];
+
+    if (listaGrelha.some(p => p.id === idAtual)) listaAtual = listaGrelha;
+    else if (listaProntos.some(p => p.id === idAtual)) listaAtual = listaProntos;
+    else if (listaEntregues.some(p => p.id === idAtual)) listaAtual = listaEntregues;
+
+    if (listaAtual.length === 0) return;
+    const index = listaAtual.findIndex(p => p.id === idAtual);
+    let proximoId: number | null = null;
+    if (index < listaAtual.length - 1) {
+      proximoId = listaAtual[index + 1].id;
+    }
+    else if (index > 0) {
+      proximoId = listaAtual[index - 1].id;
+    }
+    else {
+      setPedidoSelecionadoId(proximoId);
+    }
+
+    setPedidoSelecionadoId(proximoId);
+  };
 
   useEffect(() => {
     const token = Cookies.get('token_pedidos');
@@ -45,7 +179,7 @@ export default function Home() {
       const channel = supabase
         .channel('mudancas-pedidos')
         .on(
-          'postgres_changes',{ event: '*',schema: 'public',table: 'Pedido' },
+          'postgres_changes', { event: '*', schema: 'public', table: 'Pedido' },
           (payload) => {
             fetchPedidos();
           }
@@ -76,6 +210,7 @@ export default function Home() {
   };
 
   const moverParaPronto = async (id: number) => {
+    selecionarProximoDaFila(id);
     await fetch(`${API_URL}/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -100,12 +235,14 @@ export default function Home() {
   };
 
   const excluirPedido = async (id: number) => {
+    selecionarProximoDaFila(id);
     await fetch(`${API_URL}/${id}`, {
       method: 'DELETE',
     });
   };
 
   const entregarPedido = async (id: number) => {
+    selecionarProximoDaFila(id);
     await fetch(`${API_URL}/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -125,10 +262,6 @@ export default function Home() {
   if (!isAuthenticated) {
     return null;
   }
-
-  const listaGrelha = pedidos.filter(p => p.status === 'PREPARANDO').sort((a, b) => a.id - b.id);
-  const listaProntos = pedidos.filter(p => p.status === 'PRONTO').sort((a, b) => a.id - b.id);
-  const listaEntregues = pedidos.filter(p => p.status === 'ENTREGUE').sort((a, b) => a.id - b.id);
 
   return (
     <div className="min-h-screen w-full bg-gray-50 dark:bg-[#121212] font-sans overflow-x-hidden">
@@ -160,6 +293,9 @@ export default function Home() {
               textoBotao="TÁ PRONTO!"
               markStatus={moverParaPronto}
               editar={abrirEdicao}
+              idSelecionado={pedidoSelecionadoId}
+              aoSelecionar={setPedidoSelecionadoId}
+              destacarSelecao={usandoTeclado}
             />
           </div>
           <div className="bg-green-50/50 dark:bg-green-900/10 rounded-2xl p-2 md:p-4 border border-green-100 dark:border-green-900/30 h-fit transition-all duration-300">
@@ -170,6 +306,9 @@ export default function Home() {
               textoBotao="ENTREGAR"
               markStatus={entregarPedido}
               voltar={returnPrepPedido}
+              idSelecionado={pedidoSelecionadoId}
+              aoSelecionar={setPedidoSelecionadoId}
+              destacarSelecao={usandoTeclado}
 
             />
           </div>
@@ -182,6 +321,10 @@ export default function Home() {
               textoBotao="FINALIZAR"
               markStatus={excluirPedido}
               voltar={returnReadyPedido}
+              idSelecionado={pedidoSelecionadoId}
+              aoSelecionar={setPedidoSelecionadoId}
+              destacarSelecao={usandoTeclado}
+
 
             />
           </div>
