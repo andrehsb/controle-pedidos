@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreatePedidoDto } from './dto/create-pedido.dto';
 import { UpdatePedidoDto } from './dto/update-pedido.dto';
 import { PrismaService } from './prisma.service';
@@ -14,6 +14,11 @@ export class PedidosService {
   constructor(private prisma: PrismaService) { }
 
   async create(createPedidoDto: CreatePedidoDto) {
+    const valores = Object.values(createPedidoDto.itens);
+    const totalItens = valores.reduce((acc, curr) => acc + Number(curr), 0);
+    if (totalItens <= 0) {
+      throw new BadRequestException('O pedido não pode estar vazio.');
+    }
     return this.prisma.pedido.create({
       data: {
         nome: createPedidoDto.nome,

@@ -1,6 +1,6 @@
 'use client';
 
-import { PlusIcon, XMarkIcon, MinusIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, XMarkIcon, MinusIcon} from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
 
 type PedidoItens = {
@@ -155,6 +155,7 @@ export default function AddPedido({ closeModal, aoAdicionar, pedidoEditar }: Add
                 {!temItens ? (
                     <p className='text-gray-400 italic text-sm'>Nenhum item adicionado ainda.</p>
                 ) : (
+                    <>
                     <div className='bg-white p-4 rounded-lg border border-gray-200 mt-2 relative pr-12 animate-fade-in'>
 
                         <div className='flex flex-wrap gap-2'>
@@ -180,11 +181,13 @@ export default function AddPedido({ closeModal, aoAdicionar, pedidoEditar }: Add
                             <XMarkIcon className='size-5 md:size-6' />
                         </button>
                     </div>
-                )}
-
-                <button type="submit" className='bg-[#545454] text-white px-4 py-2 rounded-md hover:bg-[#16430A] transition-colors cursor-pointer' >
+                     <button type="submit" className='bg-[#545454] text-white px-4 py-2 rounded-md hover:bg-[#16430A] transition-colors cursor-pointer' >
                     {pedidoEditar ? "Salvar Alterações" : "Adicionar Pedido"}
                 </button>
+                </>
+                )}
+
+
             </form>
         </section>
     );
