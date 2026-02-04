@@ -8,13 +8,15 @@ type PedidoItens = {
     FB: number;
     CO: number;
     F: number;
+    J: number;
 };
 
 const PRECOS: Record<keyof PedidoItens, number> = {
     CA: 12.00,
     FB: 12.00,
     CO: 10.00,
-    F: 10.00
+    F: 10.00,
+    J: 15.00
 };
 
 type AddPedidoProps = {
@@ -31,7 +33,8 @@ export default function AddPedido({ closeModal, aoAdicionar, pedidoEditar }: Add
         CA: 0,
         FB: 0,
         CO: 0,
-        F: 0
+        F: 0,
+        J: 0
     });
 
     const updateQuantidade = (tipo: keyof PedidoItens, valor: number) => {
@@ -51,12 +54,13 @@ export default function AddPedido({ closeModal, aoAdicionar, pedidoEditar }: Add
                 CA: pedidoEditar.itens.CA || 0,
                 FB: pedidoEditar.itens.FB || 0,
                 CO: pedidoEditar.itens.CO || 0,
-                F: pedidoEditar.itens.F || 0
+                F: pedidoEditar.itens.F || 0,
+                J: pedidoEditar.itens.J || 0
             });
         } else {
             // Limpa se for novo pedido
             setNome('');
-            setItens({ CA: 0, FB: 0, CO: 0, F: 0 });
+            setItens({ CA: 0, FB: 0, CO: 0, F: 0, J: 0 });
         }
     }, [pedidoEditar]);
 
@@ -65,7 +69,8 @@ export default function AddPedido({ closeModal, aoAdicionar, pedidoEditar }: Add
             CA: 0,
             FB: 0,
             CO: 0,
-            F: 0
+            F: 0,
+            J: 0
         });
     };
 
@@ -111,12 +116,12 @@ export default function AddPedido({ closeModal, aoAdicionar, pedidoEditar }: Add
                         onChange={(e) => setNome(e.target.value)}
                         className='text-[#171918] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#737373]' />
                 </div>
-                <div className='grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8' >
+                <div className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8' >
                     <div className='bg-[#0E0E0E] px-1 md:px-2 h-10 md:h-15 rounded-xl md:rounded-2xl flex items-center justify-between'>
                         <button type="button" onClick={() => updateQuantidade('CA', -1)}>
                             <MinusIcon className='size-4 md:size-6 text-white cursor-pointer' />
                         </button>
-                        <span className='text-white font-bold' >CA</span>
+                        <span className='text-white font-bold' >Carne</span>
                         <button type="button" onClick={() => updateQuantidade('CA', 1)}>
                             <PlusIcon className='size-4 md:size-6 text-white cursor-pointer' />
                         </button>
@@ -126,7 +131,7 @@ export default function AddPedido({ closeModal, aoAdicionar, pedidoEditar }: Add
                         <button type="button" onClick={() => updateQuantidade('FB', -1)}>
                             <MinusIcon className='size-4 md:size-6 text-white cursor-pointer' />
                         </button>
-                        <span className='text-white font-bold' >FB</span>
+                        <span className='text-white font-bold' >Medalhão</span>
                         <button type="button" onClick={() => updateQuantidade('FB', 1)}>
                             <PlusIcon className='size-4 md:size-6 text-white cursor-pointer' />
                         </button>
@@ -136,7 +141,7 @@ export default function AddPedido({ closeModal, aoAdicionar, pedidoEditar }: Add
                         <button type="button" onClick={() => updateQuantidade('CO', -1)}>
                             <MinusIcon className='size-4 md:size-6 text-white cursor-pointer' />
                         </button>
-                        <span className='text-white font-bold' >CO</span>
+                        <span className='text-white font-bold' >Coração</span>
                         <button type="button" onClick={() => updateQuantidade('CO', 1)}>
                             <PlusIcon className='size-4 md:size-6 text-white cursor-pointer' />
                         </button>
@@ -146,12 +151,21 @@ export default function AddPedido({ closeModal, aoAdicionar, pedidoEditar }: Add
                         <button type="button" onClick={() => updateQuantidade('F', -1)}>
                             <MinusIcon className='size-4 md:size-6 text-white cursor-pointer' />
                         </button>
-                        <span className='text-white font-bold' >F</span>
+                        <span className='text-white font-bold' >Frango</span>
                         <button type="button" onClick={() => updateQuantidade('F', 1)}>
                             <PlusIcon className='size-4 md:size-6 text-white cursor-pointer' />
                         </button>
                     </div>
                 </div>
+                <div className='bg-[#16430A] px-1 md:px-2 h-10 md:h-15 rounded-xl md:rounded-2xl flex items-center justify-between'>
+                        <button type="button" onClick={() => updateQuantidade('J', -1)}>
+                            <MinusIcon className='size-4 md:size-6 text-white cursor-pointer' />
+                        </button>
+                        <span className='text-white font-bold' >Jantinha</span>
+                        <button type="button" onClick={() => updateQuantidade('J', 1)}>
+                            <PlusIcon className='size-4 md:size-6 text-white cursor-pointer' />
+                        </button>
+                    </div>
                 {!temItens ? (
                     <p className='text-gray-400 italic text-sm'>Nenhum item adicionado ainda.</p>
                 ) : (
