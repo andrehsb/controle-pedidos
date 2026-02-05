@@ -157,7 +157,7 @@ export default function AddPedido({ closeModal, aoAdicionar, pedidoEditar }: Add
                         </button>
                     </div>
                 </div>
-                <div className='bg-[#16430A] px-1 md:px-2 h-10 md:h-15 rounded-xl md:rounded-2xl flex items-center justify-between'>
+                <div className='bg-[#800020] px-1 md:px-2 h-10 md:h-15 rounded-xl md:rounded-2xl flex items-center justify-between'>
                         <button type="button" onClick={() => updateQuantidade('J', -1)}>
                             <MinusIcon className='size-4 md:size-6 text-white cursor-pointer' />
                         </button>
